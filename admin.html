@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fleet Management - Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    *{
+      box-sizing:border-box;
+    }
+    body{
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:#f5f5f5;
+    }
+
+    /* navbar */
+    .navbar{
+      background:#1a237e;
+      color:#fff;
+      padding:10px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      gap:12px;
+    }
+    .nav-left h1{
+      margin:0;
+      font-size:20px;
+    }
+    .nav-left small{
+      font-size:12px;
+      opacity:.9;
+    }
+    .nav-middle{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      font-size:13px;
+    }
+    .nav-middle select{
+      padding:4px 6px;
+      border-radius:4px;
+      border:1px solid #ccc;
+      font-size:13px;
+    }
+    .nav-middle button{
+      padding:4px 10px;
+      border-radius:4px;
+      border:none;
+      background:#fff;
+      color:#1a237e;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .nav-right{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:13px;
+    }
+    .profile-pic{
+      width:32px;
+      height:32px;
+      border-radius:50%;
+      overflow:hidden;
+      border:2px solid #fff;
+    }
+    .profile-pic img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    /* layout */
+    .wrapper{
+      display:flex;
+      gap:16px;
+      padding:16px;
+    }
+    .sidebar{
+      width:260px;
+      background:#fff;
+      border-radius:8px;
+      padding:12px 14px;
+      box-shadow:0 0 6px rgba(0,0,0,0.08);
+      height:fit-content;
+    }
+    .sidebar h2{
+      margin:0 0 10px;
+      font-size:18px;
+    }
+    .sidebar label{
+      display:block;
+      margin-top:8px;
+      margin-bottom:3px;
+      font-size:14px;
+    }
+    .sidebar input,
+    .sidebar select{
+      width:100%;
+      padding:6px 8px;
+      border-radius:4px;
+      border:1px solid #ccc;
+      font-size:14px;
+    }
+    .sidebar button{
+      width:100%;
+      margin-top:14px;
+      padding:8px 0;
+      border-radius:4px;
+      border:none;
+      background:#388e3c;
+      color:#fff;
+      font-size:15px;
+      cursor:pointer;
+    }
+
+    .main{
+      flex:1;
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+      gap:14px;
+    }
+    .card{
+      background:#fff;
+      border-radius:8px;
+      overflow:hidden;
+      box-shadow:0 1px 6px rgba(0,0,0,0.12);
+      display:flex;
+      flex-direction:column;
+      font-size:13px;
+    }
+    .card img{
+      width:100%;
+      height:120px;
+      object-fit:cover;
+    }
+    .card-body{
+      padding:8px 10px 10px;
+    }
+    .card-body h3{
+      margin:4px 0 6px;
+      font-size:15px;
+    }
+    .card-body p{
+      margin:2px 0;
+    }
+    .status.available{
+      color:#388e3c;
+      font-weight:bold;
+    }
+    .status.unavailable{
+      color:#d32f2f;
+      font-weight:bold;
+    }
+    .card-buttons{
+      margin-top:8px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:6px;
+    }
+    .card-buttons button{
+      font-size:11px;
+      padding:4px 4px;
+      border-radius:4px;
+      border:none;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .btn-update{background:#1976d2;color:#fff;}
+    .btn-toggle{background:#f9a825;color:#000;}
+    .btn-delete{background:#d32f2f;color:#fff;}
+
+    @media(max-width:768px){
+      .wrapper{flex-direction:column;}
+      .sidebar{width:100%;}
+      .navbar{align-items:flex-start;}
+    }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="nav-left">
+      <h1>Fleet Management</h1>
+      <small>Admin Dashboard</small>
+    </div>
+
+    <div class="nav-middle">
+      <label for="filter-category">Category:</label>
+      <select id="filter-category">
+        <option value="All">All</option>
+        <option value="Auto">Auto</option>
+        <option value="Car">Car</option>
+        <option value="Truck">Truck</option>
+        <option value="Bus">Bus</option>
+      </select>
+
+      <label for="filter-availability">Availability:</label>
+      <select id="filter-availability">
+        <option value="All">All</option>
+        <option value="Available">Available</option>
+        <option value="Unavailable">Unavailable</option>
+      </select>
+
+      <button id="clear-filters">Clear Filter</button>
+    </div>
+
+    <div class="nav-right">
+      <span>Admin</span>
+      <div class="profile-pic">
+        <img src="https://via.placeholder.com/80x80?text=A" alt="profile">
+      </div>
+    </div>
+  </header>
+
+  <div class="wrapper">
+    <aside class="sidebar">
+      <h2>Add Fleet</h2>
+      <form id="fleet-form">
+        <label>Reg No of Vehicle</label>
+        <input id="regNo" type="text">
+
+        <label>Category</label>
+        <select id="category">
+          <option value="">Select</option>
+          <option value="Auto">Auto</option>
+          <option value="Car">Car</option>
+          <option value="Truck">Truck</option>
+          <option value="Bus">Bus</option>
+        </select>
+
+        <label>Driver Name</label>
+        <input id="driver" type="text">
+
+        <label>Is Available</label>
+        <select id="availability">
+          <option value="">Select</option>
+          <option value="Available">Available</option>
+          <option value="Unavailable">Unavailable</option>
+        </select>
+
+        <button type="submit">Add Fleet</button>
+      </form>
+    </aside>
+
+    <main class="main">
+      <div id="card-container" class="cards"></div>
+    </main>
+  </div>
+
+  <script>
+    
+    var VEHICLE_IMAGE = "https://coding-platform.s3.amazonaws.com/dev/lms/tickets/5e80fcb6-3f8e-480c-945b-30a5359eb40e/JNmYjkVr3WOjsrbu.png";
+
+    // initial data so cards are visible
+    var fleetData = [
+      { id: 1, regNo: "KA01AB1234", category: "Auto",  driver: "Ravi",  available: true  },
+      { id: 2, regNo: "KA02CD5678", category: "Car",   driver: "Sita",  available: false },
+      { id: 3, regNo: "KA03EF9012", category: "Truck", driver: "Rahul", available: true  }
+    ];
+    var idCounter = fleetData.length + 1;
+
+    var fleetForm = document.getElementById("fleet-form");
+    var regNoInput = document.getElementById("regNo");
+    var categoryInput = document.getElementById("category");
+    var driverInput = document.getElementById("driver");
+    var availabilityInput = document.getElementById("availability");
+
+    var filterCategory = document.getElementById("filter-category");
+    var filterAvailability = document.getElementById("filter-availability");
+    var clearFiltersBtn = document.getElementById("clear-filters");
+    var cardContainer = document.getElementById("card-container");
+
+    // Add Fleet
+    fleetForm.addEventListener("submit", function(e){
+      e.preventDefault();
+
+      var regNo = regNoInput.value.trim();
+      var category = categoryInput.value;
+      var driver = driverInput.value.trim();
+      var availability = availabilityInput.value;
+
+      if(!regNo || !category || !driver || !availability){
+        alert("Please fill all fields before adding fleet.");
+        return;
+      }
+
+      var newFleet = {
+        id: idCounter++,
+        regNo: regNo,
+        category: category,
+        driver: driver,
+        available: availability === "Available"
+      };
+
+      fleetData.push(newFleet);
+
+      regNoInput.value = "";
+      categoryInput.value = "";
+      driverInput.value = "";
+      availabilityInput.value = "";
+
+      renderCards();
+    });
+
+    // Filters
+    filterCategory.addEventListener("change", renderCards);
+    filterAvailability.addEventListener("change", renderCards);
+
+    clearFiltersBtn.addEventListener("click", function(){
+      filterCategory.value = "All";
+      filterAvailability.value = "All";
+      renderCards();
+    });
+
+    function getFilteredData(){
+      var cFilter = filterCategory.value;
+      var aFilter = filterAvailability.value;
+
+      return fleetData.filter(function(item){
+        var catMatch = (cFilter === "All") || (item.category === cFilter);
+        var statusText = item.available ? "Available" : "Unavailable";
+        var availMatch = (aFilter === "All") || (statusText === aFilter);
+        return catMatch && availMatch;
+      });
+    }
+
+    // Render cards
+    function renderCards(){
+      cardContainer.innerHTML = "";
+      var dataToShow = getFilteredData();
+
+      dataToShow.forEach(function(item){
+        var card = document.createElement("div");
+        card.className = "card";
+
+        var img = document.createElement("img");
+        img.src = VEHICLE_IMAGE;
+        img.alt = "vehicle";
+
+        var body = document.createElement("div");
+        body.className = "card-body";
+
+        var title = document.createElement("h3");
+        title.textContent = "Reg No: " + item.regNo;
+
+        var catP = document.createElement("p");
+        catP.textContent = "Category: " + item.category;
+
+        var driverP = document.createElement("p");
+        driverP.textContent = "Driver: " + item.driver;
+
+        var statusP = document.createElement("p");
+        var statusText = item.available ? "Available" : "Unavailable";
+        statusP.textContent = "Status: " + statusText;
+        statusP.className = "status " + (item.available ? "available" : "unavailable");
+
+        var btnBox = document.createElement("div");
+        btnBox.className = "card-buttons";
+
+        var btnUpdate = document.createElement("button");
+        btnUpdate.className = "btn-update";
+        btnUpdate.textContent = "Update Driver";
+
+        var btnToggle = document.createElement("button");
+        btnToggle.className = "btn-toggle";
+        btnToggle.textContent = "Change Availability";
+
+        var btnDelete = document.createElement("button");
+        btnDelete.className = "btn-delete";
+        btnDelete.textContent = "Delete Vehicle";
+
+        // Update Driver
+        btnUpdate.addEventListener("click", function(){
+          var newName = prompt("Enter new driver name:");
+          if(newName === null) return;
+          if(newName.trim() === ""){
+            alert("Driver name cannot be empty.");
+            return;
+          }
+          item.driver = newName.trim();
+          renderCards();
+        });
+
+        // Change Availability
+        btnToggle.addEventListener("click", function(){
+          item.available = !item.available;
+          renderCards();
+        });
+
+        // Delete Vehicle
+        btnDelete.addEventListener("click", function(){
+          var ok = confirm("Are you sure you want to delete this vehicle?");
+          if(!ok) return;
+          fleetData = fleetData.filter(function(f){
+            return f.id !== item.id;
+          });
+          renderCards();
+        });
+
+        btnBox.appendChild(btnUpdate);
+        btnBox.appendChild(btnToggle);
+        btnBox.appendChild(btnDelete);
+
+        body.appendChild(title);
+        body.appendChild(catP);
+        body.appendChild(driverP);
+        body.appendChild(statusP);
+        body.appendChild(btnBox);
+
+        card.appendChild(img);
+        card.appendChild(body);
+
+        cardContainer.appendChild(card);
+      });
+    }
+
+    // first time render
+    renderCards();
+  </script>
+</body>
+</html>
